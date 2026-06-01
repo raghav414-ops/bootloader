@@ -17,26 +17,36 @@ uint32_t get_tick(void);
 //volatile uint32_t tick_freq = 1;
 
 // delay in seconds
-void delay(uint32_t delay)
+//void delay(uint32_t delay)
+//{
+//	uint32_t tickstart = get_tick();
+//	uint32_t wait = delay;
+//
+//	if(wait < MAX_DELAY)
+//	{
+//		wait += (uint32_t)TICK_FREQ;
+//	}
+//
+//	while((get_tick() - tickstart) < wait){}
+//}
+
+void delay(uint32_t delay_ticks)
 {
-	uint32_t tickstart = get_tick();
-	uint32_t wait = delay;
+    uint32_t tickstart = get_tick();
 
-	if(wait < MAX_DELAY)
-	{
-		wait += (uint32_t)TICK_FREQ;
-	}
-
-	while((get_tick() - tickstart) < wait){}
+    // This exact subtraction handle 32-bit overflow flawlessly
+    while ((get_tick() - tickstart) < delay_ticks)
+    {
+        // Do nothing, just wait
+    }
 }
-
 
 uint32_t get_tick(void)
 {
-	__disable_irq();
-	g_curr_tick_p = g_curr_tick;
-	__enable_irq();
-	return g_curr_tick_p;
+//	__disable_irq();
+//	g_curr_tick_p = g_curr_tick;
+//	__enable_irq();
+	return g_curr_tick;
 }
 
 static void tick_increment(void)
@@ -49,7 +59,7 @@ void timebase_init(void)
 	//Disable global interrupts
 	__disable_irq();
 	//Load the timer with number of clock cycles per second
-	SysTick->LOAD = ONE_SEC_LOAD - 1;
+	SysTick->LOAD = (ONE_SEC_LOAD/TICK_FREQ) - 1;
 	//Clear systick current value register
 	SysTick->VAL = 0;
 	//select internal clock source
